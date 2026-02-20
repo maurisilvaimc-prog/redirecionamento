@@ -3,7 +3,7 @@ import {
   mockUnits, mockForms, mockStrings, mockClasses,
   mockTypes, mockSourceFiles, mockMapEntries, mockNames
 } from '@/data/index';
-import { supabase } from '@/integrations/supabase/client';
+
 import { Unit, DFMForm, DFMComponent, DecompiledString, ClassNode, RTTIType, SourceFile, MapEntry, NameEntry } from '@/lib/index';
 import {
   Menubar,
@@ -110,6 +110,7 @@ export function MenuBar() {
       const formData = new FormData();
       formData.append('file', file);
 
+      const { supabase } = await import('@/integrations/supabase/client');
       const { data, error } = await supabase.functions.invoke('analyze-pe', {
         body: formData,
       });
