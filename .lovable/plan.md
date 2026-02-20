@@ -1,33 +1,51 @@
 
 
-## Correcao: Modal de Progresso nao aparece ao carregar arquivo
+## Correcao: Dados decompilados nao aparecem apos carregamento
 
 ### Problema identificado
 
-Quando o usuario seleciona um arquivo .exe/.dll, o `setInterval` que simula o progresso executa corretamente, mas:
+Apos analisar o codigo, identifiquei dois problemas:
 
-1. O `ProgressModal` so e renderizado dentro do `IDRWorkspace` (pagina `/workspace`)
-2. Se o usuario ja esta no workspace, ao atingir 100% o codigo chama `setDecompiling(false)` e `navigate()` no mesmo instante -- o modal some imediatamente e a navegacao pode causar remontagem do componente
-3. O overlay esmaecido do `Layout` aparece (a "barra esmaecida"), mas o modal com a barra de progresso e sobreposto pela navegacao
+1. **Navegacao redundante**: Quando o usuario ja esta em `/workspace` e carrega um arquivo, o `navigate(ROUTE_PATHS.WORKSPACE)` tenta navegar para a mesma rota. Isso pode causar comportamentos inesperados no React Router, como re-renderizacao sem atualizar o estado visual.
+
+2. **Dependencias do useCallback incompletas**: O callback `onFileChosen` usa `useCallback` com dependencias que nao incluem os setters de dados (`setUnits`, `setForms`, etc.). Embora os setters do Zustand sejam estaveis, e boa pratica inclui-los para garantir consistencia.
 
 ### Solucao
 
 **Arquivo: `src/components/MenuBar.tsx`**
-- Separar a logica: primeiro completar a animacao de progresso com um pequeno delay antes de navegar
-- Chamar `setDecompiling(false)` ANTES de navegar, com um `setTimeout` de ~500ms apos atingir 100%, para que o usuario veja o progresso finalizado
-- Mover a logica de carregamento de dados simulados (popular units, strings, forms, etc. do store) para dentro do callback de conclusao
 
-**Arquivo: `src/pages/IDRWorkspace.tsx`** (ou `src/App.tsx`)
-- Mover o `ProgressModal` para o `Layout` ou para o `App.tsx` como componente global, para que ele apareca independente da rota atual
-- Isso garante que se o usuario estiver na Home ou em qualquer rota, o modal de progresso sera visivel
+- Remover a chamada `navigate(ROUTE_PATHS.WORKSPACE)` quando o usuario ja esta na rota `/workspace` (usar `window.location.pathname` para verificar)
+- Adicionar todos os setters de dados na lista de dependencias do `useCallback`
+- Forcar uma atualizacao visual apos popular o store: garantir que `setDecompiling(false)` ocorra apos todos os setters de dados serem chamados
 
-**Arquivo: `src/components/Layout.tsx`**
-- Remover o overlay esmaecido duplicado (`isDecompiling && <div ... />`) ja que o `ProgressModal` possui seu proprio backdrop
+A logica ficara assim:
 
-### Resumo das alteracoes
+```
+if (p >= 100) {
+  clearInterval(interval);
+  setProgress(100, 'Analise concluida!');
+  // Popular dados
+  setUnits(mockUnits);
+  setForms(mockForms);
+  // ... demais setters
+  setTimeout(() => {
+    setDecompiling(false);
+    // So navegar se nao estiver no workspace
+    if (window.location.pathname !== ROUTE_PATHS.WORKSPACE) {
+      navigate(ROUTE_PATHS.WORKSPACE);
+    }
+  }, 500);
+}
+```
 
-1. Tornar o `ProgressModal` global (renderizado no `App.tsx`)
-2. Remover overlay duplicado do `Layout.tsx`
-3. Ajustar timing no `MenuBar.tsx`: ao atingir 100%, aguardar 500ms, depois desativar decompiling e navegar
-4. Garantir que o intervalo e limpo corretamente para evitar memory leaks
+- Atualizar as dependencias do `useCallback` para incluir todos os setters usados
+
+### Resultado esperado
+
+Apos selecionar um arquivo .exe/.dll:
+1. Modal de progresso aparece e vai ate 100%
+2. Dados sao carregados no store (units, forms, strings, classes, etc.)
+3. Modal fecha e o painel esquerdo exibe as unidades, tipos e formularios
+4. A area central exibe o codigo decompilado
+5. A barra de status mostra o nome do arquivo carregado
 
