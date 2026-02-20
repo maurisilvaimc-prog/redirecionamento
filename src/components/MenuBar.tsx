@@ -38,6 +38,8 @@ import {
   History,
   Key,
   Palette,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { DELPHI_VERSIONS, DelphiVersion, ROUTE_PATHS } from '@/lib/index';
 import { useIDRStore } from '@/hooks/useIDRStore';
@@ -55,6 +57,8 @@ export function MenuBar() {
     redo,
     isDirty,
     loadedFile,
+    theme,
+    setTheme,
     setLoadedFile,
     setDecompiling,
     setProgress,
@@ -348,6 +352,11 @@ export function MenuBar() {
               Configurações
             </MenubarSubTrigger>
             <MenubarSubContent>
+              <MenubarItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                {theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}
+              </MenubarItem>
+              <MenubarSeparator />
               <MenubarItem>
                 <Type className="mr-2 h-4 w-4" />
                 Fontes
