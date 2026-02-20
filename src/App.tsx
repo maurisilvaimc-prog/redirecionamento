@@ -7,6 +7,7 @@ import { MotionConfig } from "framer-motion";
 import { ROUTE_PATHS } from "@/lib/index";
 import Home from "@/pages/Home";
 import IDRWorkspace from "@/pages/IDRWorkspace";
+import { ProgressModal } from "@/components/Modals";
 
 /**
  * Cliente para gerenciamento de estado assíncrono e cache de dados
@@ -58,6 +59,9 @@ export default function App() {
                 />
               </Routes>
             </BrowserRouter>
+
+            {/* Modal de Progresso Global */}
+            <ProgressModal />
 
             {/* Componentes de Feedback Global */}
             <Toaster />

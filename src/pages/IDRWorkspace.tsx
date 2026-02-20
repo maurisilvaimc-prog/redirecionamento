@@ -9,7 +9,7 @@ import {
   ResizablePanel, 
   ResizablePanelGroup 
 } from "@/components/ui/resizable";
-import { ProgressModal } from "@/components/Modals";
+
 
 /**
  * Workspace principal da aplicação IDR Web Edition.
@@ -149,8 +149,6 @@ export default function IDRWorkspace() {
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        {/* Modais de Progresso de Operações Longas */}
-        {(isDecompiling || isCompiling) && <ProgressModal />}
       </div>
     </Layout>
   );
