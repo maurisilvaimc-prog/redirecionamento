@@ -113,14 +113,17 @@ export function MenuBar() {
         setNames(mockNames);
         setTimeout(() => {
           setDecompiling(false);
-          navigate(ROUTE_PATHS.WORKSPACE);
+          // Only navigate if not already on workspace
+          if (window.location.pathname !== ROUTE_PATHS.WORKSPACE) {
+            navigate(ROUTE_PATHS.WORKSPACE);
+          }
         }, 500);
       }
     }, 200);
 
     // Reset input so the same file can be selected again
     e.target.value = '';
-  }, [setLoadedFile, addRecentFile, setDecompiling, setProgress, navigate]);
+  }, [setLoadedFile, addRecentFile, setDecompiling, setProgress, navigate, setUnits, setForms, setStrings, setClassTree, setTypes, setSourceCode, setMapEntries, setNames]);
 
   return (
     <>
