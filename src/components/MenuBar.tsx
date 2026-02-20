@@ -1,5 +1,9 @@
 import React, { useRef, useCallback } from 'react';
 import {
+  mockUnits, mockForms, mockStrings, mockClasses,
+  mockTypes, mockSourceFiles, mockMapEntries, mockNames
+} from '@/data/index';
+import {
   Menubar,
   MenubarContent,
   MenubarItem,
@@ -55,6 +59,14 @@ export function MenuBar() {
     setDecompiling,
     setProgress,
     addRecentFile,
+    setUnits,
+    setForms,
+    setStrings,
+    setClassTree,
+    setTypes,
+    setSourceCode,
+    setMapEntries,
+    setNames,
   } = useIDRStore();
 
   const handleFileSelect = useCallback((version: DelphiVersion) => {
@@ -90,6 +102,15 @@ export function MenuBar() {
       if (p >= 100) {
         clearInterval(interval);
         setProgress(100, 'Análise concluída!');
+        // Populate store with mock decompiled data
+        setUnits(mockUnits);
+        setForms(mockForms);
+        setStrings(mockStrings);
+        setClassTree(mockClasses);
+        setTypes(mockTypes);
+        setSourceCode(mockSourceFiles);
+        setMapEntries(mockMapEntries);
+        setNames(mockNames);
         setTimeout(() => {
           setDecompiling(false);
           navigate(ROUTE_PATHS.WORKSPACE);
