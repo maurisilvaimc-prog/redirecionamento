@@ -1,0 +1,42 @@
+import { Unit, UNIT_TYPES } from '../lib/index';
+
+export const mockUnits: Unit[] = [
+  // Standard VCL Units
+  { id: 'unit-system', address: '0066B808', name: 'system', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-sysutils', address: '00670000', name: 'SysUtils', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-classes', address: '00680000', name: 'Classes', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-controls', address: '005A0000', name: 'Controls', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-forms', address: '005B0000', name: 'Forms', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-stdctrls', address: '005C0000', name: 'StdCtrls', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-graphics', address: '005D0000', name: 'Graphics', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-menus', address: '005E0000', name: 'Menus', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-dialogs', address: '005F0000', name: 'Dialogs', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-comctrls', address: '00590000', name: 'ComCtrls', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-extctrls', address: '00580000', name: 'ExtCtrls', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-grids', address: '00570000', name: 'Grids', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-windows', address: '00660000', name: 'Windows', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-commctrl', address: '00650000', name: 'CommCtrl', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-jpeg', address: '0068F000', name: 'jpeg', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-variants', address: '00640000', name: 'variants', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-typinfo', address: '00630000', name: 'TypInfo', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-inifiles', address: '00620000', name: 'IniFiles', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-printers', address: '00610000', name: 'Printers', type: UNIT_TYPES.STANDARD, flags: { hasInitialization: true, hasFinalization: true } },
+  // User Units (IDR application units)
+  { id: 'unit-idr', address: '00691DC0', name: 'Idr', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-2', address: '00401828', name: '_Unit2 (FMain)', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-3', address: '004627EC', name: '_Unit3 (FTypeInfo)', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-4', address: '00470000', name: '_Unit4', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-5', address: '00475000', name: '_Unit5', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-6', address: '00480000', name: '_Unit6', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-7', address: '00482998', name: '_Unit7 (Threads)', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: true } },
+  { id: 'unit-8', address: '00490000', name: '_Unit8', type: UNIT_TYPES.USER, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-9', address: '004A0000', name: '_Unit9', type: UNIT_TYPES.USER, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-10', address: '004B0000', name: '_Unit10', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-14', address: '004F0000', name: '_Unit14', type: UNIT_TYPES.USER, flags: { hasInitialization: true, hasFinalization: false } },
+  { id: 'unit-15', address: '00500000', name: '_Unit15', type: UNIT_TYPES.USER, flags: { hasInitialization: false, hasFinalization: false } },
+  // Trivial units
+  { id: 'unit-89', address: '00654F74', name: '_Unit89', type: UNIT_TYPES.TRIVIAL, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-91', address: '00656070', name: '_Unit91', type: UNIT_TYPES.TRIVIAL, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-110', address: '0067757C', name: '_Unit110', type: UNIT_TYPES.TRIVIAL, flags: { hasInitialization: false, hasFinalization: false } },
+  { id: 'unit-125', address: '0067ED38', name: '_Unit125', type: UNIT_TYPES.TRIVIAL, flags: { hasInitialization: false, hasFinalization: false } },
+];

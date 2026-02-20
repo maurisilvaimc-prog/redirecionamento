@@ -67,6 +67,7 @@ export function MenuBar() {
     setSourceCode,
     setMapEntries,
     setNames,
+    setSelectedUnitId,
   } = useIDRStore();
 
   const handleFileSelect = useCallback((version: DelphiVersion) => {
@@ -111,6 +112,11 @@ export function MenuBar() {
         setSourceCode(mockSourceFiles);
         setMapEntries(mockMapEntries);
         setNames(mockNames);
+        // Auto-select the first user unit so workspace shows content
+        const firstUserUnit = mockUnits.find(u => u.type === 'user') || mockUnits[0];
+        if (firstUserUnit) {
+          setSelectedUnitId(firstUserUnit.id);
+        }
         setTimeout(() => {
           setDecompiling(false);
           // Only navigate if not already on workspace
@@ -123,7 +129,7 @@ export function MenuBar() {
 
     // Reset input so the same file can be selected again
     e.target.value = '';
-  }, [setLoadedFile, addRecentFile, setDecompiling, setProgress, navigate, setUnits, setForms, setStrings, setClassTree, setTypes, setSourceCode, setMapEntries, setNames]);
+  }, [setLoadedFile, addRecentFile, setDecompiling, setProgress, navigate, setUnits, setForms, setStrings, setClassTree, setTypes, setSourceCode, setMapEntries, setNames, setSelectedUnitId]);
 
   return (
     <>
