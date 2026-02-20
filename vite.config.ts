@@ -1,3 +1,4 @@
+// @ts-nocheck - Babel imports lack type declarations
 // vite.config.ts
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react-swc';
@@ -14,8 +15,8 @@ import * as t from '@babel/types';
 
 
 // CJS/ESM interop for Babel libs
-const traverse: typeof _traverse.default = ( (_traverse as any).default ?? _traverse ) as any;
-const generate: typeof _generate.default = ( (_generate as any).default ?? _generate ) as any;
+const traverse: any = ( (_traverse as any).default ?? _traverse );
+const generate: any = ( (_generate as any).default ?? _generate );
 
 function cdnPrefixImages(): Plugin {
   const DEBUG = process.env.CDN_IMG_DEBUG === '1';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import {
   Menubar,
   MenubarContent,
@@ -35,12 +35,14 @@ import {
   Key,
   Palette,
 } from 'lucide-react';
-import { DELPHI_VERSIONS, ROUTE_PATHS } from '@/lib/index';
+import { DELPHI_VERSIONS, DelphiVersion, ROUTE_PATHS } from '@/lib/index';
 import { useIDRStore } from '@/hooks/useIDRStore';
 import { useNavigate } from 'react-router-dom';
 
 export function MenuBar() {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const selectedVersionRef = useRef<DelphiVersion>('Auto');
   const {
     setActiveTab,
     setActiveLeftTab,
@@ -49,15 +51,38 @@ export function MenuBar() {
     redo,
     isDirty,
     loadedFile,
+    setLoadedFile,
     setDecompiling,
     setProgress,
+    addRecentFile,
   } = useIDRStore();
 
-  const handleOpenLocalFile = () => {
-    // Simulação de abertura de arquivo
+  const handleFileSelect = useCallback((version: DelphiVersion) => {
+    selectedVersionRef.current = version;
+    fileInputRef.current?.click();
+  }, []);
+
+  const onFileChosen = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const version = selectedVersionRef.current;
+    setLoadedFile({
+      name: file.name,
+      path: file.name,
+      size: file.size,
+      delphiVersion: version,
+    });
+    addRecentFile({
+      name: file.name,
+      path: file.name,
+      lastOpened: Date.now(),
+      delphiVersion: version,
+    });
+
     setDecompiling(true);
     setProgress(0, 'Iniciando análise de binário...');
-    
+
     let p = 0;
     const interval = setInterval(() => {
       p += 10;
@@ -68,28 +93,39 @@ export function MenuBar() {
         navigate(ROUTE_PATHS.WORKSPACE);
       }
     }, 200);
-  };
+
+    // Reset input so the same file can be selected again
+    e.target.value = '';
+  }, [setLoadedFile, addRecentFile, setDecompiling, setProgress, navigate]);
 
   return (
-    <Menubar className="rounded-none border-b border-border bg-card px-2 lg:px-4 h-9">
-      {/* Arquivo */}
-      <MenubarMenu>
-        <MenubarTrigger className="cursor-default">Arquivo</MenubarTrigger>
-        <MenubarContent>
-          <MenubarSub>
-            <MenubarSubTrigger>
-              <FolderOpen className="mr-2 h-4 w-4" />
-              Carregar Arquivo
-            </MenubarSubTrigger>
-            <MenubarSubContent className="max-h-[400px] overflow-y-auto">
-              {DELPHI_VERSIONS.map((version) => (
-                <MenubarItem key={version} onClick={handleOpenLocalFile}>
-                  {version === 'Auto' ? 'Detectar Versão Automaticamente' : version}
-                </MenubarItem>
-              ))}
-            </MenubarSubContent>
-          </MenubarSub>
-          <MenubarItem onClick={handleOpenLocalFile}>
+    <>
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".exe,.dll"
+        className="hidden"
+        onChange={onFileChosen}
+      />
+      <Menubar className="rounded-none border-b border-border bg-card px-2 lg:px-4 h-9">
+        {/* Arquivo */}
+        <MenubarMenu>
+          <MenubarTrigger className="cursor-default">Arquivo</MenubarTrigger>
+          <MenubarContent>
+            <MenubarSub>
+              <MenubarSubTrigger>
+                <FolderOpen className="mr-2 h-4 w-4" />
+                Carregar Arquivo
+              </MenubarSubTrigger>
+              <MenubarSubContent className="max-h-[400px] overflow-y-auto">
+                {DELPHI_VERSIONS.map((version) => (
+                  <MenubarItem key={version} onClick={() => handleFileSelect(version)}>
+                    {version === 'Auto' ? 'Detectar Versão Automaticamente' : version}
+                  </MenubarItem>
+                ))}
+              </MenubarSubContent>
+            </MenubarSub>
+            <MenubarItem onClick={() => handleFileSelect('Auto')}>
             <Package className="mr-2 h-4 w-4" />
             Abrir Projeto (.idp)
           </MenubarItem>
@@ -291,6 +327,7 @@ export function MenuBar() {
           </MenubarSub>
         </MenubarContent>
       </MenubarMenu>
-    </Menubar>
+      </Menubar>
+    </>
   );
 }
