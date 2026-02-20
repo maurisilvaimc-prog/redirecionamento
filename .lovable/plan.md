@@ -1,31 +1,33 @@
 
-## Plano: Seletor de Arquivos .exe/.dll ao clicar em "Detectar Versao Automaticamente"
 
-### O que muda
+## Correcao: Modal de Progresso nao aparece ao carregar arquivo
 
-Ao clicar em "Detectar Versao Automaticamente" (ou qualquer versao Delphi no submenu), o sistema vai:
+### Problema identificado
 
-1. Abrir o seletor de arquivos nativo do navegador, filtrando por `.exe` e `.dll`
-2. Apos o usuario escolher um arquivo, iniciar a simulacao de analise (barra de progresso)
-3. Salvar o nome e tamanho do arquivo selecionado no estado global
-4. Redirecionar para o workspace
+Quando o usuario seleciona um arquivo .exe/.dll, o `setInterval` que simula o progresso executa corretamente, mas:
 
-### Detalhes tecnicos
+1. O `ProgressModal` so e renderizado dentro do `IDRWorkspace` (pagina `/workspace`)
+2. Se o usuario ja esta no workspace, ao atingir 100% o codigo chama `setDecompiling(false)` e `navigate()` no mesmo instante -- o modal some imediatamente e a navegacao pode causar remontagem do componente
+3. O overlay esmaecido do `Layout` aparece (a "barra esmaecida"), mas o modal com a barra de progresso e sobreposto pela navegacao
+
+### Solucao
 
 **Arquivo: `src/components/MenuBar.tsx`**
-- Adicionar um `<input type="file" accept=".exe,.dll" />` oculto (hidden) com `useRef`
-- Criar funcao `handleFileSelect` que abre o file picker
-- Criar funcao `onFileChosen` que recebe o `File` do input, salva no store (`setLoadedFile`) com nome, tamanho e versao selecionada, e entao inicia a animacao de progresso
-- "Detectar Versao Automaticamente" chamara `handleFileSelect` com versao `'Auto'`
-- As demais versoes (Delphi 2, 3, etc.) tambem abrirao o file picker, passando a versao correspondente
+- Separar a logica: primeiro completar a animacao de progresso com um pequeno delay antes de navegar
+- Chamar `setDecompiling(false)` ANTES de navegar, com um `setTimeout` de ~500ms apos atingir 100%, para que o usuario veja o progresso finalizado
+- Mover a logica de carregamento de dados simulados (popular units, strings, forms, etc. do store) para dentro do callback de conclusao
 
-**Arquivo: `src/hooks/useIDRStore.ts`**
-- Nenhuma alteracao necessaria -- `setLoadedFile` ja existe e aceita `name`, `path`, `size` e `delphiVersion`
+**Arquivo: `src/pages/IDRWorkspace.tsx`** (ou `src/App.tsx`)
+- Mover o `ProgressModal` para o `Layout` ou para o `App.tsx` como componente global, para que ele apareca independente da rota atual
+- Isso garante que se o usuario estiver na Home ou em qualquer rota, o modal de progresso sera visivel
 
-### Fluxo do usuario
+**Arquivo: `src/components/Layout.tsx`**
+- Remover o overlay esmaecido duplicado (`isDecompiling && <div ... />`) ja que o `ProgressModal` possui seu proprio backdrop
 
-1. Clica em Arquivo > Carregar Arquivo > Detectar Versao Automaticamente
-2. Abre o seletor de arquivos do sistema operacional (filtrado para .exe e .dll)
-3. Seleciona um arquivo
-4. Aparece modal de progresso simulando a analise
-5. Ao concluir, redireciona para `/workspace` com o arquivo "carregado"
+### Resumo das alteracoes
+
+1. Tornar o `ProgressModal` global (renderizado no `App.tsx`)
+2. Remover overlay duplicado do `Layout.tsx`
+3. Ajustar timing no `MenuBar.tsx`: ao atingir 100%, aguardar 500ms, depois desativar decompiling e navegar
+4. Garantir que o intervalo e limpo corretamente para evitar memory leaks
+
