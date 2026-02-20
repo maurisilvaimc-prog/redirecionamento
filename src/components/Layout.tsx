@@ -78,10 +78,6 @@ export function Layout({ children }: LayoutProps) {
         <StatusBar />
       </footer>
 
-      {/* Overlay de carregamento global para processos pesados (opcional) */}
-      {useIDRStore.getState().isDecompiling && (
-        <div className="fixed inset-0 z-[100] bg-background/20 backdrop-blur-[1px] pointer-events-none transition-all" />
-      )}
     </div>
   );
 }

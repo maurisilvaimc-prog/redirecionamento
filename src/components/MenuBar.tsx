@@ -89,8 +89,11 @@ export function MenuBar() {
       setProgress(p, `Processando estruturas Delphi... ${p}%`);
       if (p >= 100) {
         clearInterval(interval);
-        setDecompiling(false);
-        navigate(ROUTE_PATHS.WORKSPACE);
+        setProgress(100, 'Análise concluída!');
+        setTimeout(() => {
+          setDecompiling(false);
+          navigate(ROUTE_PATHS.WORKSPACE);
+        }, 500);
       }
     }, 200);
 
