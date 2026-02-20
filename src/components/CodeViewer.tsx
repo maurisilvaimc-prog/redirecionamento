@@ -43,6 +43,7 @@ export function CodeViewer() {
     loadedFile, 
     selectedUnitId, 
     units, 
+    sourceCode,
     setActiveTab, 
     font 
   } = useIDRStore();
@@ -56,23 +57,73 @@ export function CodeViewer() {
     [units, selectedUnitId]
   );
 
-  // Mock assembly data based on selected unit
-  const asmLines: AsmLine[] = useMemo(() => [
-    { address: '', bytes: '', mnemonic: 'procedure', operands: 'TForm1.Button1Click(Sender: TObject);', isLabel: true },
-    { address: '00452A10', bytes: '55', mnemonic: 'push', operands: 'ebp', comment: 'Salva base pointer' },
-    { address: '00452A11', bytes: '8B EC', mnemonic: 'mov', operands: 'ebp, esp', comment: 'Novo frame' },
-    { address: '00452A13', bytes: '83 C4 F8', mnemonic: 'add', operands: 'esp, -08', comment: 'Espaço local' },
-    { address: '00452A16', bytes: '53', mnemonic: 'push', operands: 'ebx' },
-    { address: '00452A17', bytes: '8B D8', mnemonic: 'mov', operands: 'ebx, eax', comment: 'Self -> ebx' },
-    { address: '00452A19', bytes: 'B8 10 2B 45 00', mnemonic: 'mov', operands: 'eax, 00452B10', comment: "'Olá Mundo'" },
-    { address: '00452A1E', bytes: 'E8 AD 12 FB FF', mnemonic: 'call', operands: 'ShowMessage', comment: 'VCL.Dialogs' },
-    { address: '00452A23', bytes: '5B', mnemonic: 'pop', operands: 'ebx' },
-    { address: '00452A24', bytes: '8B E5', mnemonic: 'mov', operands: 'esp, ebp' },
-    { address: '00452A26', bytes: '5D', mnemonic: 'pop', operands: 'ebp' },
-    { address: '00452A27', bytes: 'C3', mnemonic: 'ret', operands: '', isModified: true },
-    { address: '', bytes: '', mnemonic: '', operands: '' },
-    { address: '00452A28', bytes: '00 00', mnemonic: 'add', operands: '[eax], al', isLabel: true, comment: 'Padding' },
-  ], [selectedUnitId]);
+
+  // Parse assembly/pascal from the selected unit's source files
+  const asmLines: AsmLine[] = useMemo(() => {
+    if (!selectedUnitId) return [];
+
+    // Find ASM source first, then Pascal
+    const asmFile = sourceCode.find(f => f.unitId === selectedUnitId && f.language === 'asm');
+    const pasFile = sourceCode.find(f => f.unitId === selectedUnitId && f.language === 'pascal');
+    
+    const sourceContent = asmFile?.content || pasFile?.content || '';
+    if (!sourceContent) return [];
+
+    const lines: AsmLine[] = [];
+    const contentLines = sourceContent.split('\n');
+
+    for (const line of contentLines) {
+      const trimmed = line.trim();
+      
+      // Match assembly lines like: "0066B808   8B00   mov     eax, [eax]"
+      const asmMatch = trimmed.match(/^([0-9A-Fa-f]{8})\s+([0-9A-Fa-f\s]+?)\s{2,}(\w+)\s*(.*?)$/);
+      if (asmMatch) {
+        const [, addr, bytes, mnemonic, rest] = asmMatch;
+        const commentIdx = rest.indexOf(';');
+        const operands = commentIdx >= 0 ? rest.substring(0, commentIdx).trim() : rest.trim();
+        const comment = commentIdx >= 0 ? rest.substring(commentIdx + 1).trim() : undefined;
+        lines.push({ address: addr, bytes: bytes.trim(), mnemonic, operands, comment });
+        continue;
+      }
+
+      // Match lines from {* ... *} blocks: " 0066B808    mov     eax,[eax]"
+      const blockMatch = trimmed.match(/^>?([0-9A-Fa-f]{8})\s+(\w+)\s*(.*?)$/);
+      if (blockMatch) {
+        const [, addr, mnemonic, rest] = blockMatch;
+        const commentIdx = rest.indexOf(';');
+        const operands = commentIdx >= 0 ? rest.substring(0, commentIdx).trim() : rest.trim();
+        const comment = commentIdx >= 0 ? rest.substring(commentIdx + 1).trim() : undefined;
+        lines.push({ address: addr, bytes: '', mnemonic, operands, comment });
+        continue;
+      }
+
+      // Match procedure/function labels
+      const labelMatch = trimmed.match(/^(procedure|function|constructor|destructor)\s+(.+)/i);
+      if (labelMatch) {
+        lines.push({ address: '', bytes: '', mnemonic: labelMatch[1], operands: labelMatch[2], isLabel: true });
+        continue;
+      }
+
+      // Match "//00XXXXXX" address comments as section headers
+      const sectionMatch = trimmed.match(/^\/\/([0-9A-Fa-f]{8})$/);
+      if (sectionMatch) {
+        lines.push({ address: sectionMatch[1], bytes: '', mnemonic: '--- ', operands: `Section @ ${sectionMatch[1]}`, isLabel: true });
+        continue;
+      }
+
+      // Skip non-code lines (comments, empty, begin/end, {*, *})
+      if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('{') || trimmed.startsWith('*}') || 
+          trimmed === 'begin' || trimmed === 'end;' || trimmed === 'end.' ||
+          trimmed.startsWith('unit ') || trimmed === 'interface' || trimmed === 'implementation' ||
+          trimmed.startsWith('uses')) {
+        continue;
+      }
+    }
+
+    return lines.length > 0 ? lines : [
+      { address: '', bytes: '', mnemonic: '; ', operands: 'Nenhum código assembly disponível para esta unidade', isLabel: true }
+    ];
+  }, [selectedUnitId, sourceCode]);
 
   const navigateTo = (address: string) => {
     const newHistory = history.slice(0, historyIndex + 1);
