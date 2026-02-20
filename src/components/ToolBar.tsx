@@ -11,7 +11,9 @@ import {
   Binary,
   Download,
   Type,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useIDRStore } from "@/hooks/useIDRStore";
 import { Button } from "@/components/ui/button";
@@ -76,7 +78,9 @@ export function ToolBar() {
     isDirty,
     setActiveTab,
     isDecompiling,
-    isCompiling
+    isCompiling,
+    theme,
+    setTheme
   } = useIDRStore();
 
   const handleDecompileSrc = () => {
@@ -84,7 +88,7 @@ export function ToolBar() {
   };
 
   return (
-    <div className="flex items-center gap-1 h-10 px-2 bg-secondary/30 border-b border-border shrink-0 overflow-x-auto no-scrollbar">
+    <div className="flex items-center gap-1 h-10 px-2 bg-card border-b border-border shrink-0 overflow-x-auto no-scrollbar">
       {/* Grupo: Arquivo */}
       <div className="flex items-center gap-0.5">
         <ToolBarButton 
@@ -147,6 +151,11 @@ export function ToolBar() {
       </div>
 
       <div className="ml-auto flex items-center gap-0.5">
+        <ToolBarButton 
+          icon={theme === 'dark' ? Sun : Moon} 
+          label={theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        />
         <ToolBarButton icon={Type} label="Configurações de Fontes" />
         <ToolBarButton icon={Settings} label="Configurações Gerais" />
       </div>

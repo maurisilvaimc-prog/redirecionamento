@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MenuBar } from '@/components/MenuBar';
 import { ToolBar } from '@/components/ToolBar';
 import { StatusBar } from '@/components/StatusBar';
@@ -22,18 +22,24 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const theme = useIDRStore((state) => state.theme);
 
+  // Apply dark class to <html> element so CSS variables work correctly
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [theme]);
+
   return (
     <div 
-      className={`
-        flex flex-col h-screen w-full overflow-hidden 
-        bg-background text-foreground font-sans transition-colors duration-200
-        ${theme === 'dark' ? 'dark' : ''}
-      `}
+      className="flex flex-col h-screen w-full overflow-hidden bg-background text-foreground font-sans transition-colors duration-200"
     >
       {/* Topo da Aplicação: Barra de Marca, Menu e Ferramentas */}
       <header className="flex flex-col shrink-0 border-b border-border bg-card shadow-sm z-50">
         {/* Barra Superior Integrada: Logo + MenuBar */}
-        <div className="flex items-center bg-muted/40 px-3 h-10 border-b border-border/50">
+        <div className="flex items-center bg-card px-3 h-10 border-b border-border">
           <div className="flex items-center gap-2 mr-6 select-none shrink-0">
             <img 
               src={IMAGES.IDR_LOGO_20260220_015613_1} 
